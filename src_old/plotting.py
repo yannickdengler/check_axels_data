@@ -67,12 +67,12 @@ def plot_E_prime(file, show=False, save = True, pref = ""):
     plt.errorbar(N_Ls, E_pipi_prime[0], yerr = [E_pipi_prime[1],E_pipi_prime[2]], capsize=3, ls="", marker = "x")
 
     plt.legend()
-    plt.savefig("en_l_new.pdf")
+    plt.savefig("out/plots/en_l_new.pdf")
     plt.show()
     plt.clf()
 
 
-def plot_E(file, show=False, save = True, pref = ""):
+def plot_E(file, show=False, save = True, which = "aE", pref = ""):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
@@ -82,75 +82,88 @@ def plot_E(file, show=False, save = True, pref = ""):
     num_gaussian = len(res_sample["E_prime"])
 
     N_Ls = res["N_Ls"]
-    plt.ylabel("E/m$\pi$")
-    plt.xlabel("N_L")
-    plt.grid()
+    lvls = res["level"]
+    dvecs = res["dvecs"]
+    ax.set_xlabel("N_L")
+    ax.grid()
+
     xarr = np.linspace(min(N_Ls)-1, max(N_Ls)+1)
-    pipi1arr = [mpi*en_L(x,1) for x in xarr]
-    pipi2arr = [mpi*en_L(x,2) for x in xarr]
-    rho1arr = [mpi*en_rho_L(x,1) for x in xarr]
-    rho2arr = [mpi*en_rho_L(x,2) for x in xarr]
-    plt.axhline(mpi*2, color = "green", label = "pipi")
-    plt.axhline(mrho, color = "orange", label = "rho")
-    plt.plot(xarr, pipi1arr, ls = "dashdot", color = "green")
-    plt.plot(xarr, pipi2arr, ls = "dashdot", color = "green")
-    plt.plot(xarr, rho1arr, ls = "dashdot", color = "orange")
-    plt.plot(xarr, rho2arr, ls = "dashdot", color = "orange")
-
-    E_pipi_prime = [mpi*x for x in error_of_array(res_sample["E_prime"])]
-
-    plt.errorbar(N_Ls, E_pipi_prime[0], yerr = [E_pipi_prime[1],E_pipi_prime[2]], capsize=3, ls="", marker = "x")
-
-    plt.legend()
-    plt.savefig("aen_l_new.pdf")
-    plt.show()
-    plt.clf()
+    if which == "aE":
+        ax.set_ylabel("E/m$\pi$")
+        pipi1arr = [mpi*en_L(x,1) for x in xarr]
+        pipi2arr = [mpi*en_L(x,2) for x in xarr]
+        rho1arr = [mpi*en_rho_L(x,1) for x in xarr]
+        rho2arr = [mpi*en_rho_L(x,2) for x in xarr]
+        ax.axhline(mpi*2, color = "green", label = "pipi")
+        ax.axhline(mrho, color = "orange", label = "rho")
+        ax.plot(xarr, pipi1arr, ls = "dashdot", color = "green")
+        ax.plot(xarr, pipi2arr, ls = "dashdot", color = "green")
+        ax.plot(xarr, rho1arr, ls = "dashdot", color = "orange")
+        ax.plot(xarr, rho2arr, ls = "dashdot", color = "orange")
+        
+        E_pipi = error_of_array(res_sample["E_pure"])
+        for i in range(len(E_pipi[0])):
+            ax.errorbar(N_Ls[i], E_pipi[0][i], yerr = [[E_pipi[1][i],],[E_pipi[2][i],]], capsize=3, ls="", marker = ms_P(dvecs[i]), color = color_NL(N_Ls[i]), markersize = ms_size(lvls[i]))
+    elif which == "sqrt_s":
+        ax.set_ylim([1.9,3.2])
+        ax.set_ylabel("$\sqrt{s}$/$m_\pi$")
+        pipi1arr = [sqrt_s_pi_L(x,1) for x in xarr]
+        pipi2arr = [sqrt_s_pi_L(x,2) for x in xarr]
+        ax.axhline(2, color = "green", label = "pipi")
+        ax.axhline(mrho/mpi, color = "orange", label = "rho")
+        ax.plot(xarr, pipi1arr, ls = "dashdot", color = "green")
+        ax.plot(xarr, pipi2arr, ls = "dashdot", color = "green")
+        
+        E_cm_prime = error_of_array(res_sample["E_cm_prime"])
+        for i in range(len(E_cm_prime[0])):
+            ax.errorbar(N_Ls[i], E_cm_prime[0][i], yerr = [[E_cm_prime[1][i],],[E_cm_prime[2][i],]], capsize=3, ls="", marker = ms_P(dvecs[i]), color = color_NL(N_Ls[i]), markersize = ms_size(lvls[i]))
+   
+    ax.legend()
+    if save:
+        fig.savefig("out/plots/E_L_%s.pdf"%which)
+    if show:
+        plt.show()
+    fig.clf()
     
 def sqrt_s(E,P):    
     return np.sqrt(E**2-P**2)
 def sqrt_s_pi_L(N_L,p2):
     return sqrt_s(1+np.sqrt(1+p2*(2*np.pi/(N_L*mpi))**2),np.sqrt(p2)*2*np.pi/(N_L*mpi))
 
-def plot_sqrt_s(file, show=False, save = True, pref = ""):
-    plt.rcParams['figure.figsize'] = [10, 6]
-    fontsize = 14
-    font = {'size'   : fontsize}
-    matplotlib.rc('font', **font)
-    fig, ax = plt.subplots()
-    res,  res_sample = result.read_from_hdf(file)
-    num_gaussian = len(res_sample["E_prime"])
 
-    N_Ls = res["N_Ls"]    
-    plt.ylabel("$\sqrt{s}$/$m_\pi$")
-    plt.xlabel("$N_L$")
-    plt.grid()
-    xarr = np.linspace(min(N_Ls)-1, max(N_Ls)+1)
-    pipi1arr = [sqrt_s_pi_L(x,1) for x in xarr]
-    pipi2arr = [sqrt_s_pi_L(x,2) for x in xarr]
-    plt.axhline(2, color = "green", label = "pipi")
-    plt.axhline(mrho/mpi, color = "orange", label = "rho")
-    plt.plot(xarr, pipi1arr, ls = "dashdot", color = "green")
-    plt.plot(xarr, pipi2arr, ls = "dashdot", color = "green")
+def color_NL(NL):
+    if NL == 14:
+        return "red"
+    elif NL == 16:
+        return "green"
+    elif NL == 24:
+        return "blue"
 
-    E_cm_prime = error_of_array(res_sample["E_cm_prime"])
+def ls_P(dvec):
+    if list(dvec) == [0,0,1]:
+        return "solid"
+    elif list(dvec) == [1,1,0]:
+        return "dashed"
 
-    plt.errorbar(N_Ls, E_cm_prime[0], yerr = [E_cm_prime[1],E_cm_prime[2]], capsize=3, ls="", marker = "x")
+def ms_P(dvec):
+    if list(dvec) == [0,0,1]:
+        return "*"
+    elif list(dvec) == [1,1,0]:
+        return "o"
 
-    plt.legend()
-    plt.savefig("sqrt_s_new.pdf")
-    plt.show()
-    plt.clf()
-
-colors = ["magenta", "red", "green", "black", "orange", "cyan", "olive", "gray", "purple"]
+def ms_size(level):
+    if level == 1:
+        return 8
+    elif level == 2:
+        return 15
 
 def delete_steps(arr):
     for i in range(len(arr)-1):
-        print(arr[i], arr[i+1])
         if arr[i+1] < arr[i]: 
             arr[i] = np.nan
     return arr
 
-def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s"):
+def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", err="gauss"):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
@@ -159,6 +172,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s"):
     res,  res_sample = result.read_from_hdf(file)
     num_gaussian = len(res_sample["E_prime"])
 
+    lvls = res["level"] 
     N_Ls = res["N_Ls"]    
     plt.ylabel("$p^3\, \cot(\delta)/m_\pi^3$")
     plt.grid()
@@ -174,34 +188,46 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s"):
         E_cm_prime_sam = np.transpose(res_sample["E_pure"])
         ax.set_xlim([0.8, 1.3])
 
-
+    N_Ls = res["N_Ls"]
+    dvecs = res["dvecs"]
     P3_cot_PS_prime = np.real(res["P3_cot_PS_prime"])
     P3_cot_PS_prime_sam = np.transpose(np.real(res_sample["P3_cot_PS_prime"]))
 
     length = len(E_cm_prime_sam[0])
 
-    lvs = [1,2,1,2,1,2,1,1,2]
+    # lvs = [1,2,1,2,1,2,1,1,2]
     Ps = [1,1,1,1,1,1,2,2,2]
 
     num_perc = math.erf(1/np.sqrt(2))
-    # for i in range(len(E_cm_prime_sam)):
     for i in [1,3,5,8]:
-        print(i, E_cm_prime[i])
-        ax.scatter(E_cm_prime[i],P3_cot_PS_prime[i], color = colors[i], label = "Lv: %i, |P|=%i, NL=%i"%(lvs[i],Ps[i],N_Ls[i]))
+        ax.scatter(E_cm_prime[i],P3_cot_PS_prime[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
         sorted_indices = np.argsort(E_cm_prime_sam[i])  
-        ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(P3_cot_PS_prime_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = colors[i])
+        if err == "gauss":
+            ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(P3_cot_PS_prime_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+        else:
+            ax.plot(E_cm_prime_sam[i],delete_steps(P3_cot_PS_prime_sam[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
 
     ax.set_ylim([-5,5])
     ax.legend(loc="best")
-    fig.savefig("p3_cotPS_%s.pdf"%(x_ax))
-    plt.show()
+    if save:
+        fig.savefig("p3_cotPS_%s%s.pdf"%(x_ax,pref))
+    if show:
+        plt.show()
     fig.clf()
 
 
 if __name__ == "__main__":
-    # plot_E("PS_69_092")    
-    # plot_sqrt_s("PS_69_092")   
-    p3_cot_PS("PS_69_092")    
-    p3_cot_PS("PS_69_092", x_ax="aE")    
+    plot_E("PS_69_092", which="aE", save=True, show=False)
+    plot_E("PS_69_092", which="sqrt_s", save=True, show=False)
+    p3_cot_PS("PS_69_092", x_ax="aE", save=True, show=False)
+    p3_cot_PS("PS_69_092", x_ax="sqrt_s", save=True, show=False)
+    # plot_E("PS_69_092_lin", which="aE", save=False, show=True, err = "lin")
+    # plot_E("PS_69_092_lin", which="sqrt_s", save=False, show=True, err = "lin")
+    # p3_cot_PS("PS_69_092_lin", x_ax="aE", save=True, show=True, err = "lin")
+    # p3_cot_PS("PS_69_092_lin", x_ax="sqrt_s", save=True, show=True, err = "lin")
+    # plot_E("PS_69_092_gauss", which="aE", save=True, show=True)
+    # plot_E("PS_69_092_gauss", which="sqrt_s", save=True, show=True)
+    # p3_cot_PS("PS_69_092_gauss", x_ax="aE", save=True, show=True, pref="_gauss")
+    # p3_cot_PS("PS_69_092_gauss", x_ax="sqrt_s", save=True, show=True, pref="_gauss")
 
