@@ -51,12 +51,12 @@ def result_sampled(beta,m0,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,en_lv,mpi,num_gau
     for key in res.keys():
         res_sample[key] = []
 
-    # for i in tqdm(range(num_gaussian)):
-        # if i < num_gaussian//2:
-        #     E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
-        # else:
-        #     E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))
-    for E_pipi_tmp in tqdm(np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_gaussian)):
+    for i in tqdm(range(num_gaussian)):
+        if i < num_gaussian//2:
+            E_pipi_tmp = E_pipi+abs(np.random.normal(0,E_pipi_ep))
+        else:
+            E_pipi_tmp = E_pipi-abs(np.random.normal(0,E_pipi_em))
+    # for E_pipi_tmp in tqdm(np.linspace(E_pipi-E_pipi_em,E_pipi+E_pipi_ep, num_gaussian)):
         res_tmp = get_rizz(E_pipi_tmp,N_L,dvec,en_lv,mpi)
         for key, val in res_tmp.items():
             res_sample[key].append(val)

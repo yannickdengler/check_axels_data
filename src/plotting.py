@@ -37,39 +37,6 @@ def colorf(en_lv_ind):
     else:
         return "red"
 
-def plot_E_prime(file, show=False, save = True, pref = ""):
-    plt.rcParams['figure.figsize'] = [10, 6]
-    fontsize = 14
-    font = {'size'   : fontsize}
-    matplotlib.rc('font', **font)
-    fig, ax = plt.subplots()
-    res,  res_sample = result.read_from_hdf(file)
-    num_gaussian = len(res_sample["E_prime"])
-
-    N_Ls = res["N_Ls"]
-    plt.ylabel("E/m$\pi$")
-    plt.xlabel("N_L")
-    plt.grid()
-    xarr = np.linspace(min(N_Ls)-1, max(N_Ls)+1)
-    pipi1arr = [en_L(x,1) for x in xarr]
-    pipi2arr = [en_L(x,2) for x in xarr]
-    rho1arr = [en_rho_L(x,1) for x in xarr]
-    rho2arr = [en_rho_L(x,2) for x in xarr]
-    plt.axhline(2, color = "green", label = "pipi")
-    plt.axhline(mrho/mpi, color = "orange", label = "rho")
-    plt.plot(xarr, pipi1arr, ls = "dashdot", color = "green")
-    plt.plot(xarr, pipi2arr, ls = "dashdot", color = "green")
-    plt.plot(xarr, rho1arr, ls = "dashdot", color = "orange")
-    plt.plot(xarr, rho2arr, ls = "dashdot", color = "orange")
-
-    E_pipi_prime = error_of_array(res_sample["E_prime"])
-
-    plt.errorbar(N_Ls, E_pipi_prime[0], yerr = [E_pipi_prime[1],E_pipi_prime[2]], capsize=3, ls="", marker = "x")
-
-    plt.legend()
-    plt.savefig("en_l_new.pdf")
-    plt.show()
-    plt.clf()
 
 
 def plot_E(file, show=False, save = True, which = "aE", pref = ""):
@@ -120,7 +87,7 @@ def plot_E(file, show=False, save = True, which = "aE", pref = ""):
    
     ax.legend()
     if save:
-        fig.savefig("E_L_%s.pdf"%which)
+        fig.savefig("output/plots/E_L_%s.pdf"%which)
     if show:
         plt.show()
     fig.clf()
@@ -163,7 +130,7 @@ def delete_steps(arr):
             arr[i] = np.nan
     return arr
 
-def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", err="gauss"):
+def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s"):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
@@ -195,23 +162,19 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", err="ga
 
     length = len(E_cm_prime_sam[0])
 
-    # lvs = [1,2,1,2,1,2,1,1,2]
     Ps = [1,1,1,1,1,1,2,2,2]
 
     num_perc = math.erf(1/np.sqrt(2))
     for i in [1,3,5,8]:
-        ax.scatter(E_cm_prime[i],P3_cot_PS_prime[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
+        ax.scatter(E_cm_prime[i],P3_cot_PS_prime[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
         sorted_indices = np.argsort(E_cm_prime_sam[i])  
-        if err == "gauss":
-            ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(P3_cot_PS_prime_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-        else:
-            ax.plot(E_cm_prime_sam[i],delete_steps(P3_cot_PS_prime_sam[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+        ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(P3_cot_PS_prime_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
 
     ax.set_ylim([-5,5])
     ax.legend(loc="best")
     if save:
-        fig.savefig("p3_cotPS_%s%s.pdf"%(x_ax,pref))
+        fig.savefig("output/plots/p3_cotPS_%s%s.pdf"%(x_ax,pref))
     if show:
         plt.show()
     fig.clf()
@@ -222,12 +185,4 @@ if __name__ == "__main__":
     plot_E("PS_69_092", which="sqrt_s", save=True, show=False)
     p3_cot_PS("PS_69_092", x_ax="aE", save=True, show=False)
     p3_cot_PS("PS_69_092", x_ax="sqrt_s", save=True, show=False)
-    # plot_E("PS_69_092_lin", which="aE", save=False, show=True, err = "lin")
-    # plot_E("PS_69_092_lin", which="sqrt_s", save=False, show=True, err = "lin")
-    # p3_cot_PS("PS_69_092_lin", x_ax="aE", save=True, show=True, err = "lin")
-    # p3_cot_PS("PS_69_092_lin", x_ax="sqrt_s", save=True, show=True, err = "lin")
-    # plot_E("PS_69_092_gauss", which="aE", save=True, show=True)
-    # plot_E("PS_69_092_gauss", which="sqrt_s", save=True, show=True)
-    # p3_cot_PS("PS_69_092_gauss", x_ax="aE", save=True, show=True, pref="_gauss")
-    # p3_cot_PS("PS_69_092_gauss", x_ax="sqrt_s", save=True, show=True, pref="_gauss")
 
