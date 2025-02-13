@@ -6,7 +6,8 @@ import h5py
 
 
 
-data = np.transpose(np.genfromtxt("data/axel_data.dat"))
+# data = np.transpose(np.genfromtxt("data/axel_data.dat"))
+data = np.transpose(np.genfromtxt("data/corrfitter.dat"))
 
 print(data.shape)
 
@@ -45,7 +46,7 @@ def read_from_hdf(filename):
                 res_tmp[key[7:]] = hfile[key][()]
     return res, res_tmp
 
-def result_sampled(beta,m0,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,en_lv,mpi,num_gaussian=500):
+def result_sampled(beta,m0,N_L,E_pipi,E_pipi_em,E_pipi_ep,dvec,en_lv,mpi,num_gaussian=50):
     res = get_rizz(E_pipi,N_L,dvec,en_lv,mpi)
     res_sample = {}
     for key in res.keys():
@@ -150,6 +151,7 @@ def get_rizz(E_pipis, N_Ls, dvecs, en_lvs, mpi):
     result["q2"] = q2
     result["cot_PS"] = cot_PS
     result["tan_PS"] = tan_PS
+    result["PS"] = np.arctan(tan_PS)
     result["P_cot_PS_prime"] = P_cot_PS_prime
     result["P3_cot_PS_prime"] = P3_cot_PS_prime
     return result
