@@ -2,12 +2,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import h5py
-# import scattering as result
 import math
-
-
-# mpi = 0.38649
-# mrho = 0.5494
 
 def read_from_hdf(filename):
     res, res_tmp = [{},{}]
@@ -55,7 +50,7 @@ def en_L(N_L,p2,mpi):                                           # wrong formula 
 def en_rho_L(N_L,p2,mrho,mpi):
     return np.sqrt(mrho**2+p2*(2*np.pi/N_L)**2)/mpi
     
-# def sqrt_s(E,P):
+# def sqrt_s(E,P):                                              # rewrite
 #     return np.sqrt(E**2-P**2)
 # def sqrt_s_pi_L(N_L,p2,Ptot2):
 #     return sqrt_s(en_L(N_L,p2),np.sqrt(Ptot2)*2*np.pi/(N_L*mpi))
@@ -71,8 +66,6 @@ def colorf(en_lv_ind):
     else:
         return "red"
 
-
-
 def plot_E(file, show=False, save = True, which = "aE", pref = ""):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
@@ -80,22 +73,22 @@ def plot_E(file, show=False, save = True, which = "aE", pref = ""):
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     res,  res_sample =read_from_hdf(file)
-    num_gaussian = len(res_sample["E_prime"])
+    num_gaussian = len(res_sample["En"])
 
     mpi = res["mpi"]
     mrho = res["mrho"]
-    N_Ls = res["N_Ls"]
-    lvls = res["level"]
-    dvecs = res["dvecs"]
+    N_Ls = res["N_L"]
+    lvls = res["en_lv"]
+    dvecs = res["dvec"]
     ds = res["d"]
-    Ps = [1,1,1,1,1,1,2,2,2]
+    d2s = res["d2"]
 
     ax.set_xlabel("N_L")
     ax.grid()
 
     xarr = np.linspace(min(N_Ls)-1, max(N_Ls)+1)
     if which == "aE":
-        # ax.set_ylabel("E/m$\pi$")
+        ax.set_ylabel("aE")
         ax.set_ylim([0.5,1.1])
         ax.set_ylabel("aE")
         pipi1arr = [mpi*en_L(x,1,mpi) for x in xarr]
@@ -110,9 +103,7 @@ def plot_E(file, show=False, save = True, which = "aE", pref = ""):
         ax.plot(xarr, rho1arr, ls = "dotted", color = "orange")
         ax.plot(xarr, rho2arr, ls = "dashdot", color = "orange")
         
-        E_pipi = error_of_array(res["resampling"])(res_sample["E_pure"])
-        for i in range(len(E_pipi[0])):
-            ax.errorbar(N_Ls[i], E_pipi[0][i], yerr = [[E_pipi[1][i],],[E_pipi[2][i],]], capsize=3, ls="", marker = ms_P(dvecs[i]), color = color_NL(N_Ls[i]), markersize = ms_size(lvls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]))
+        y_plot = error_of_array(res["resampling"])(res_sample["En"])
     elif which == "sqrt_s":
         ax.set_ylim([1.9,2.4])
         ax.set_ylabel("$\sqrt{s}$/$m_\pi$")
@@ -127,13 +118,13 @@ def plot_E(file, show=False, save = True, which = "aE", pref = ""):
         # ax.plot(xarr, pipi21arr, ls = "dotted", color = "green")
         ax.plot(xarr, pipi22arr, ls = "dashdot", color = "green")
         
-        E_cm_prime = error_of_array(res["resampling"])(res_sample["E_cm_prime"])
-        for i in range(len(E_cm_prime[0])):
-            ax.errorbar(N_Ls[i], E_cm_prime[0][i], yerr = [[E_cm_prime[1][i],],[E_cm_prime[2][i],]], capsize=3, ls="", marker = ms_P(dvecs[i]), color = color_NL(N_Ls[i]), markersize = ms_size(lvls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]))
+        y_plot = error_of_array(res["resampling"])(res_sample["E_cm_prime"])
+    for i in range(len(y_plot[0])):
+        ax.errorbar(N_Ls[i], y_plot[0][i], yerr = [[y_plot[1][i],],[y_plot[2][i],]], capsize=3, ls="", marker = ms_P(dvecs[i]), color = color_NL(N_Ls[i]), markersize = ms_size(lvls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]))
    
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     if save:
-        fig.savefig("output/plots/E_L_%s.pdf"%which, bbox_inches='tight')
+        fig.savefig("output/plots/%s_L.pdf"%which, bbox_inches='tight')
     if show:
         plt.show()
     fig.clf()
@@ -178,61 +169,64 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
     matplotlib.rc('font', **font)
     fig, ax = plt.subplots()
     res,  res_sample = read_from_hdf(file)
-    num_gaussian = len(res_sample["E_prime"])
+    num_gaussian = len(res_sample["E_cm_prime"])
 
-    lvls = res["level"] 
-    N_Ls = res["N_Ls"]    
+    lvls = res["en_lv"] 
+    N_Ls = res["N_L"]    
     plt.grid()
 
     if x_ax == "sqrt_s":
         plt.xlabel("$\sqrt{s}/m_\pi$")
-        E_cm_prime = res["E_cm_prime"]
-        E_cm_prime_sam = np.transpose(res_sample["E_cm_prime"])
-        ax.set_xlim([2,2.5])
+        x_plot = res["E_cm_prime"]
+        x_plot_sam = np.transpose(res_sample["E_cm_prime"])
+        ax.set_xlim([2,3])
     elif x_ax == "s":
         plt.xlabel("s/$m_\pi^2$")
-        E_cm_prime = res["s_prime"]
-        E_cm_prime_sam = np.transpose(res_sample["s_prime"])
-        # ax.set_xlim([2,2.5])
+        x_plot = res["s_prime"]
+        x_plot_sam = np.transpose(res_sample["s_prime"])
+        ax.set_xlim([4,7])
     elif x_ax == "aE":
         plt.xlabel("aE")
-        E_cm_prime = res["E_pure"]
-        E_cm_prime_sam = np.transpose(res_sample["E_pure"])
+        x_plot = res["En"]
+        x_plot_sam = np.transpose(res_sample["En"])
         ax.set_xlim([0.8, 1.15])
+    elif x_ax == "En_prime":
+        plt.xlabel("E/$m_\pi$")
+        x_plot = res["En_prime"]
+        x_plot_sam = np.transpose(res_sample["En_prime"])
+        ax.set_xlim([2.1, 3])
         
     if y_ax == "P3cotPS":
-        y_ax_res = np.real(res["P3_cot_PS_prime"])
-        y_ax_res_sam = np.transpose(np.real(res_sample["P3_cot_PS_prime"]))
+        y_plot = np.real(res["p3cotPS_prime"])
+        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_prime"]))
         plt.ylabel("$p^3\, \cot(\delta)/m_\pi^3$")    
         ax.set_ylim([-20,20])
     elif y_ax == "PS":
-        y_ax_res = np.real(res["PS"])
-        y_ax_res_sam = np.transpose(np.real(res_sample["PS"]))
+        y_plot = np.real(res["PS"])
+        y_plot_sam = np.transpose(np.real(res_sample["PS"]))
         plt.ylabel("$q^2$")      
         ax.set_ylim([0,180])
     elif y_ax == "q2":
-        y_ax_res = np.real(res["q2"])
-        y_ax_res_sam = np.transpose(np.real(res_sample["q2"]))
+        y_plot = np.real(res["q2"])
+        y_plot_sam = np.transpose(np.real(res_sample["q2"]))
         plt.ylabel("$q^2$")    
 
-    N_Ls = res["N_Ls"]
-    dvecs = res["dvecs"]
+    N_Ls = res["N_L"]
+    dvecs = res["dvec"]
+    d2s = res["d2"]
 
-    length = len(E_cm_prime_sam[0])
-
-    Ps = [1,1,1,1,1,1,2,2,2]
+    length = len(x_plot_sam[0])
 
 
     num_perc = math.erf(1/np.sqrt(2))
     # for i in [1,3,5,8]:
     for i in range(len(N_Ls)):
-        ax.scatter(E_cm_prime[i],y_ax_res[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],Ps[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
+        ax.scatter(x_plot[i],y_plot[i], color = color_NL(N_Ls[i]), label = "Lv: %i, |P|^2=%i, NL=%i"%(lvls[i],d2s[i],N_Ls[i]), marker = ms_P(dvecs[i]), s=10*ms_size(lvls[i]))
         if bytes.decode(res["resampling"]) == "gauss":
-            sorted_indices = np.argsort(E_cm_prime_sam[i])  
-            ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_ax_res_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
-            # ax.plot(E_cm_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],P3_cot_PS_prime_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            sorted_indices = np.argsort(x_plot_sam[i])  
+            ax.plot(x_plot_sam[i][sorted_indices][math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)],delete_steps(y_plot_sam[i][sorted_indices])[math.floor(length*(1-num_perc)/2):math.ceil(length*(1+num_perc)/2)], color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
         elif bytes.decode(res["resampling"]) == "lin":
-            ax.plot(E_cm_prime_sam[i],delete_steps(y_ax_res_sam[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
+            ax.plot(x_plot_sam[i],delete_steps(y_plot_sam[i]), color = color_NL(N_Ls[i]), ls = ls_P(dvecs[i]))
 
     ax.legend(loc="best")
     if save:
@@ -244,39 +238,40 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 def print_plymouth_table(file):
     res,  res_sample = read_from_hdf(file)
     mpi = res["mpi"]
-    E_pipi_err = error_of_array(res["resampling"])(res_sample["E_pure"])
+    E_pipi_err = error_of_array(res["resampling"])(res_sample["En"])
     E_cm_pipi_err = error_of_array(res["resampling"])(res_sample["E_cm_prime"])
     q2_err = error_of_array(res["resampling"])(res_sample["q2"])
     P3_cot_PS = error_of_array(res["resampling"])(res_sample["P3_cot_PS_prime"])
     PS = error_of_array(res["resampling"])(res_sample["PS"])
-    for i in range(len(res["E_pure"])):
-        print("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n"%(res["E_pure"][i],E_pipi_err[1][i],res["E_cm_prime"][i]*mpi,E_cm_pipi_err[1][i]*mpi,res["q2"][i],q2_err[1][i],res["P3_cot_PS_prime"][i]/res["E_cm_prime"][i]*mpi**2,res["PS"][i].real,res["PS"][i].imag))
+    for i in range(len(res["En"])):
+        print("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n"%(res["En"][i],E_pipi_err[1][i],res["E_cm_prime"][i]*mpi,E_cm_pipi_err[1][i]*mpi,res["q2"][i],q2_err[1][i],res["P3_cot_PS_prime"][i]/res["E_cm_prime"][i]*mpi**2,res["PS"][i].real,res["PS"][i].imag))
 
 def print_Lang_Prelovsek_table(file):
     res,  res_sample = read_from_hdf(file)
     mpi = res["mpi"]
-    E_n = res["E_pure"]
+    E_n = res["En"]
     p_star = res["pstar_prime"]*mpi
     s = res["s_prime"]*mpi**2
     PS = res["PS"]
     PS_sample = res_sample["PS"]
-    for i in range(len(res["E_pure"])):
+    for i in range(len(res["En"])):
         print("%f\t%f\t%f\t%f\t%f\n"%(E_n[i],p_star[i],s[i],PS[i].real,PS[i].imag))
 
 
 if __name__ == "__main__":
     # p3_cot_PS("PS_69_092", x_ax="sqrt_s", y_ax="PS", save=True, show=False)
 
-    # name="PS_69_092"
-    name="Plymouth"
+    name="PS_69_092"
+    # name="Plymouth"
     # name="Lang_Prelovsek"
 
-    print_Lang_Prelovsek_table(name)
+    # print_Lang_Prelovsek_table(name)
 
     # plot_E(name, which="aE", save=True, show=True)
     # plot_E(name, which="sqrt_s", save=True, show=True)
     # p3_cot_PS(name, x_ax="aE", save=True, show=True)
     # p3_cot_PS(name, x_ax="s", save=True, show=True)
+    p3_cot_PS(name, x_ax="En_prime", save=True, show=True)
     # p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True)
     # p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
 
