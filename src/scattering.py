@@ -144,15 +144,16 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
             result["PS"].append(complex(PS.real%180,PS.imag%180))
             PS_ld = 360*np.arctan(1/cot_PS_ld)/(2*np.pi)
             result["PS_ld"].append(complex(PS_ld.real%180,PS_ld.imag%180))
-            result["p3cotPS"].append(result["pstar"][i]**3)
-            result["p3cotPS_prime"].append(result["pstar_prime"][i]**3)
-            result["p3cotPS_ld"].append(result["pstar_ld"][i]**3)
-            result["p3cotPS_ld_prime"].append(result["pstar_ld_prime"][i]**3)
-            result["p3cotPS_Ecm"].append(result["pstar"][i]**3/result["E_cm"][i])
-            result["p3cotPS_Ecm_prime"].append(result["pstar_prime"][i]**3/result["E_cm_prime"][i])
-            result["p3cotPS_Ecm_ld"].append(result["pstar_ld"][i]**3/result["E_cm_ld"][i])
-            result["p3cotPS_Ecm_prime"].append(result["pstar_ld_prime"][i]**3/result["E_cm_ld_prime"][i])
+            result["p3cotPS"].append(result["pstar"][i]**3*cot_PS)
+            result["p3cotPS_prime"].append(result["pstar_prime"][i]**3*cot_PS)
+            result["p3cotPS_ld"].append(result["pstar_ld"][i]**3*cot_PS_ld)
+            result["p3cotPS_ld_prime"].append(result["pstar_ld_prime"][i]**3*cot_PS_ld)
+            result["p3cotPS_Ecm"].append(result["pstar"][i]**3/result["E_cm"][i]*cot_PS)
+            result["p3cotPS_Ecm_prime"].append(result["pstar_prime"][i]**3/result["E_cm_prime"][i]*cot_PS)
+            result["p3cotPS_Ecm_ld"].append(result["pstar_ld"][i]**3/result["E_cm_ld"][i]*cot_PS_ld)
+            result["p3cotPS_Ecm_ld_prime"].append(result["pstar_ld_prime"][i]**3/result["E_cm_ld_prime"][i]*cot_PS_ld)
     return result
+
 
 
 # def get_rizz(E_pipis, N_Ls, dvecs, mpi):

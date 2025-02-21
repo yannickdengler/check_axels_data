@@ -201,6 +201,11 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+"_prime"]))
         plt.ylabel("$p^3\, \cot(\delta)/m_\pi^3$")    
         ax.set_ylim([-20,20])
+    elif y_ax == "cot_PS":
+        y_plot = np.real(res["cot_PS"+ld])
+        y_plot_sam = np.transpose(np.real(res_sample["cot_PS"+ld]))
+        plt.ylabel("cot($\delta$)")      
+        ax.set_ylim([-100,100])
     elif y_ax == "PS":
         y_plot = np.real(res["PS+ld"])
         y_plot_sam = np.transpose(np.real(res_sample["PS"+ld]))
@@ -267,10 +272,10 @@ if __name__ == "__main__":
 
     # print_Lang_Prelovsek_table(name)
 
-    p3_cot_PS(name, x_ax="En_prime", save=True, show=True)
-    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True)
-    p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
-    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True, ld = "_ld")
+    p3_cot_PS(name, x_ax="aE", save=True, show=False)
+    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=False)
+    p3_cot_PS(name, x_ax="aE", save=True, show=True, ld = "_ld")
+    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=False, ld = "_ld")
 
     # plot_E(name, which="aE", save=True, show=True)
     # plot_E(name, which="sqrt_s", save=True, show=True)
@@ -278,5 +283,5 @@ if __name__ == "__main__":
     # p3_cot_PS(name, x_ax="s", save=True, show=True)
     # p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
     # p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True, ld = "_ld")
-    p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
+    # p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
 
