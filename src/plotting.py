@@ -162,7 +162,7 @@ def delete_steps(arr, sign = 1):
             arr[i] = np.nan
     return arr
 
-def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = "P3cotPS", ld=""):
+def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = "p3cotPS_Ecm", ld="", prime = ""):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
@@ -174,33 +174,44 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
     lvls = res["en_lv"] 
     N_Ls = res["N_L"]    
     plt.grid()
+    mpi_pr_s = "/m_{\pi}"
 
     if x_ax == "sqrt_s":
-        plt.xlabel("$\sqrt{s}/m_\pi$")
-        x_plot = res["E_cm"+ld+"_prime"]
-        x_plot_sam = np.transpose(res_sample["E_cm"+ld+"_prime"])
+        plt.xlabel("$E_{CM}"+mpi_pr_s+"$")
+        x_plot = res["E_cm"+ld+prime]
+        x_plot_sam = np.transpose(res_sample["E_cm"+ld+prime])
         ax.set_xlim([2,3])
     elif x_ax == "s":
-        plt.xlabel("s/$m_\pi^2$")
-        x_plot = res["s"+ld+"_prime"]
-        x_plot_sam = np.transpose(res_sample["s"+ld+"_prime"])
+        plt.xlabel("$E_{CM}^2"+mpi_pr_s+"^2$")
+        x_plot = res["s"+ld+prime]
+        x_plot_sam = np.transpose(res_sample["s"+ld+prime])
         ax.set_xlim([4,7])
+    elif x_ax == "pstar2":
+        plt.xlabel("$p^{\star^2}"+mpi_pr_s+"^2$")
+        x_plot = res["p2star"+ld+prime]
+        x_plot_sam = np.transpose(res_sample["p2star"+ld+prime])
+        ax.set_xlim([0,0.8])
     elif x_ax == "aE":
         plt.xlabel("aE")
         x_plot = res["En"]
         x_plot_sam = np.transpose(res_sample["En"])
         ax.set_xlim([0.8, 1.15])
-    elif x_ax == "En_prime":
-        plt.xlabel("E/$m_\pi$")
-        x_plot = res["En_prime"]
-        x_plot_sam = np.transpose(res_sample["En_prime"])
+    elif x_ax == "En":
+        plt.xlabel("$E"+mpi_pr_s+"$")
+        x_plot = res["En"+prime]
+        x_plot_sam = np.transpose(res_sample["En"+prime])
         ax.set_xlim([2.1, 3])
         
-    if y_ax == "P3cotPS":
-        y_plot = np.real(res["p3cotPS"+ld+"_prime"])
-        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+"_prime"]))
-        plt.ylabel("$p^3\, \cot(\delta)/m_\pi^3$")    
-        ax.set_ylim([-20,20])
+    if y_ax == "p3cotPS":
+        y_plot = np.real(res["p3cotPS"+ld+prime])
+        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+prime]))
+        plt.ylabel("$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
+        ax.set_ylim([-5,5])
+    elif y_ax == "p3cotPS_Ecm":
+        y_plot = np.real(res["p3cotPS_Ecm"+ld+prime])
+        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_Ecm"+ld+prime]))
+        plt.ylabel("$p^3\, \cot(\delta)"+mpi_pr_s+"^3$")    
+        ax.set_ylim([-2,2])
     elif y_ax == "cot_PS":
         y_plot = np.real(res["cot_PS"+ld])
         y_plot_sam = np.transpose(np.real(res_sample["cot_PS"+ld]))
@@ -235,7 +246,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
     ax.legend(loc="best")
     if save:
-        fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+pref+".pdf", bbox_inches='tight')
+        fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+prime+pref+".pdf", bbox_inches='tight')
     if show:
         plt.show()
     fig.clf()
@@ -272,10 +283,12 @@ if __name__ == "__main__":
 
     # print_Lang_Prelovsek_table(name)
 
-    p3_cot_PS(name, x_ax="aE", save=True, show=False)
-    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=False)
-    p3_cot_PS(name, x_ax="aE", save=True, show=True, ld = "_ld")
-    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=False, ld = "_ld")
+    # p3_cot_PS(name, x_ax="aE", save=True, show=False,prime="_prime")
+    # p3_cot_PS(name, x_ax="s", save=True, show=False,prime="_prime")
+    # p3_cot_PS(name, x_ax="aE", save=True, show=False, ld = "_ld",prime="_prime")
+    # p3_cot_PS(name, x_ax="s", save=True, show=True, ld = "_ld",prime="_prime")
+    p3_cot_PS(name, x_ax="pstar2", save=True, show=False,prime="_prime")
+    p3_cot_PS(name, x_ax="pstar2", save=True, show=False, ld = "_ld",prime="_prime")
 
     # plot_E(name, which="aE", save=True, show=True)
     # plot_E(name, which="sqrt_s", save=True, show=True)
