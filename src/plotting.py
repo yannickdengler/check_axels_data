@@ -162,7 +162,7 @@ def delete_steps(arr, sign = 1):
             arr[i] = np.nan
     return arr
 
-def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = "P3cotPS"):
+def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = "P3cotPS", ld=""):
     plt.rcParams['figure.figsize'] = [10, 6]
     fontsize = 14
     font = {'size'   : fontsize}
@@ -177,13 +177,13 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
     if x_ax == "sqrt_s":
         plt.xlabel("$\sqrt{s}/m_\pi$")
-        x_plot = res["E_cm_prime"]
-        x_plot_sam = np.transpose(res_sample["E_cm_prime"])
+        x_plot = res["E_cm"+ld+"_prime"]
+        x_plot_sam = np.transpose(res_sample["E_cm"+ld+"_prime"])
         ax.set_xlim([2,3])
     elif x_ax == "s":
         plt.xlabel("s/$m_\pi^2$")
-        x_plot = res["s_prime"]
-        x_plot_sam = np.transpose(res_sample["s_prime"])
+        x_plot = res["s"+ld+"_prime"]
+        x_plot_sam = np.transpose(res_sample["s"+ld+"_prime"])
         ax.set_xlim([4,7])
     elif x_ax == "aE":
         plt.xlabel("aE")
@@ -197,18 +197,18 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
         ax.set_xlim([2.1, 3])
         
     if y_ax == "P3cotPS":
-        y_plot = np.real(res["p3cotPS_prime"])
-        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS_prime"]))
+        y_plot = np.real(res["p3cotPS"+ld+"_prime"])
+        y_plot_sam = np.transpose(np.real(res_sample["p3cotPS"+ld+"_prime"]))
         plt.ylabel("$p^3\, \cot(\delta)/m_\pi^3$")    
         ax.set_ylim([-20,20])
     elif y_ax == "PS":
-        y_plot = np.real(res["PS"])
-        y_plot_sam = np.transpose(np.real(res_sample["PS"]))
+        y_plot = np.real(res["PS+ld"])
+        y_plot_sam = np.transpose(np.real(res_sample["PS"+ld]))
         plt.ylabel("$q^2$")      
         ax.set_ylim([0,180])
     elif y_ax == "q2":
-        y_plot = np.real(res["q2"])
-        y_plot_sam = np.transpose(np.real(res_sample["q2"]))
+        y_plot = np.real(res["q2"+ld])
+        y_plot_sam = np.transpose(np.real(res_sample["q2"+ld]))
         plt.ylabel("$q^2$")    
 
     N_Ls = res["N_L"]
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     # plot_E(name, which="sqrt_s", save=True, show=True)
     # p3_cot_PS(name, x_ax="aE", save=True, show=True)
     # p3_cot_PS(name, x_ax="s", save=True, show=True)
-    p3_cot_PS(name, x_ax="En_prime", save=True, show=True)
+    p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
     # p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True)
     # p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
 
