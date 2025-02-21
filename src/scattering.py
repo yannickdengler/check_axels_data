@@ -128,8 +128,10 @@ def get_rizz(E_pipis, N_Ls, dvecs, mpi):
             result["pstar_ld_prime"].append(result["pstar_ld"][i]/mpi)
             result["p2star_ld"].append(result["pstar_ld"][i]**2)
             result["p2star_ld_prime"].append(result["pstar_ld_prime"][i]**2)
-            q2 = result["pstar"][i]*N_Ls[i]/(2*np.pi)
-            q2_ld = result["pstar_ld"][i]*N_Ls[i]/(2*np.pi)
+            # q2 = result["p2star"][i]*(N_Ls[i]/(2*np.pi))**2
+            # q2_ld = result["p2star_ld"][i]*(N_Ls[i]/(2*np.pi))**2
+            q2 = result["p2star_prime"][i]*(mpi*N_Ls[i]/(2*np.pi))**2
+            q2_ld = result["p2star_ld_prime"][i]*(mpi*N_Ls[i]/(2*np.pi))**2
             result["q2"].append(q2)
             result["q2_ld"].append(q2_ld)
             cot_PS = cot_delta_mom(dvecs[i])(q2, N_Ls[i])

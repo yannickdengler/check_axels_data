@@ -230,7 +230,7 @@ def p3_cot_PS(file, show=False, save = True, pref = "", x_ax = "sqrt_s", y_ax = 
 
     ax.legend(loc="best")
     if save:
-        fig.savefig("output/plots/%s_%s_%s.pdf"%(y_ax,x_ax,pref), bbox_inches='tight')
+        fig.savefig("output/plots/%s_%s"%(y_ax,x_ax)+ld+pref+".pdf", bbox_inches='tight')
     if show:
         plt.show()
     fig.clf()
@@ -267,11 +267,16 @@ if __name__ == "__main__":
 
     # print_Lang_Prelovsek_table(name)
 
+    p3_cot_PS(name, x_ax="En_prime", save=True, show=True)
+    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True)
+    p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
+    p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True, ld = "_ld")
+
     # plot_E(name, which="aE", save=True, show=True)
     # plot_E(name, which="sqrt_s", save=True, show=True)
     # p3_cot_PS(name, x_ax="aE", save=True, show=True)
     # p3_cot_PS(name, x_ax="s", save=True, show=True)
-    p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
-    # p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True)
-    # p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
+    # p3_cot_PS(name, x_ax="En_prime", save=True, show=True, ld = "_ld")
+    # p3_cot_PS(name, x_ax="sqrt_s", save=True, show=True, ld = "_ld")
+    p3_cot_PS(name, x_ax="sqrt_s", y_ax="q2", save=True, show=True)
 
